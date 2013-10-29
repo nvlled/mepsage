@@ -55,7 +55,7 @@ func getMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderMessage(w http.ResponseWriter, msg string) {
-    t, _ := template.ParseFiles("message.html")
+    t, _ := template.ParseFiles("pages/message.html")
     t.Execute(w, map[string] string {
         "Message": msg,
     })
@@ -65,7 +65,7 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
     if r.URL.Path != "/" {
         renderMessage(w, "You must be lost.")
     } else {
-        http.ServeFile(w, r, "index.html")
+        http.ServeFile(w, r, "pages/index.html")
     }
 }
 
