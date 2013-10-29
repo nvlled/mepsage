@@ -1,0 +1,24 @@
+
+body {
+    /*
+    background: #000;
+    color: #fff;
+    */
+}
+
+#msg {
+    font-size: 100px;
+}
+
+#msg-in {
+    margin-bottom: 30px;
+}
+
+#wrapper {
+    padding-top: 50px;
+    width: 800px;
+    margin-right: auto;
+    margin-left: auto;
+    word-break: break-word;
+}
+
