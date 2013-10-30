@@ -22,3 +22,13 @@ body {
     word-break: break-word;
 }
 
+
+#wat {
+    font-size: 50px;
+    text-decoration: none;
+    color: #000;
+}
+
+#wat:hover {
+    color: #a00;
+}

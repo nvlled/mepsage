@@ -32,7 +32,7 @@ func init() {
 func main() {
     addRoutes()
     log.Println("Server started at " + Port)
-    log.Fatal(http.ListenAndServe(":"+Port, nil))
+    log.Fatal(http.ListenAndServe("mepsage:"+Port, nil))
 }
 
 func addRoutes() {
@@ -40,6 +40,7 @@ func addRoutes() {
     http.Handle("/"+ResourcesDir, http.StripPrefix("/"+ResourcesDir, fileServer))
 
     http.HandleFunc("/", indexPage)
+    http.HandleFunc("/wat", watPage)
     http.HandleFunc("/submit", submit)
     http.HandleFunc(messagePath, getMessage)
 }
@@ -68,6 +69,11 @@ func indexPage(w http.ResponseWriter, r *http.Request) {
         http.ServeFile(w, r, "pages/index.html")
     }
 }
+
+func watPage(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "pages/wat.html")
+}
+
 
 func submit(w http.ResponseWriter, r *http.Request) {
     msg := r.FormValue("msg")
