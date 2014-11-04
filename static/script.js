@@ -32,7 +32,7 @@ function submit() {
     submitting = true;
     console.log("Submitting data");
 
-    $.post("/submit", {msg: msgNode.text()})
+    $.post("/submit-async", {msg: msgNode.text()})
         .success(redirect)
         .fail(function() {
             alert("Submission failed. Please try again.");

@@ -73,7 +73,8 @@ func buildRoutes() http.Handler {
 
     router.HandleFunc("/", indexPage)
     router.HandleFunc("/about", aboutPage)
-    router.HandleFunc("/submit", submit)
+    router.HandleFunc("/submit", submitPage)
+    router.HandleFunc("/submit-async", submitAsync)
     router.HandleFunc("/{id}", messagePage)
 
     sub := router.PathPrefix("/"+ResourcesDir)
@@ -112,20 +113,34 @@ func render(w http.ResponseWriter, name string, data map[string]interface{}) {
     t.Execute(w, data)
 }
 
-func submit(w http.ResponseWriter, r *http.Request) {
+func submitPage(w http.ResponseWriter, r *http.Request) {
     msg := r.FormValue("msg")
+    id := submitMessage(msg)
+    w.Header().Set("Location", "/"+string(id))
+    w.WriteHeader(301)
+    fmt.Fprint(w, "/"+id)
+}
 
+func submitAsync(w http.ResponseWriter, r *http.Request) {
+    msg := r.FormValue("msg")
+    id := submitMessage(msg)
+    fmt.Fprint(w, "/"+id)
+}
+
+func submitMessage(msg string) MessageId {
+    var messageId MessageId
     key := HashKey(sha256.Sum256([]byte(msg)))
     if id, ok := hashes[key]; ok {
         log.Println("Re-using message with id", id)
-        fmt.Fprint(w, "/"+id)
+        messageId = id
     } else {
         id := generateId()
         hashes[key] = id
         messages[id] = msg
         addToRecentMessages(msg, id)
-        fmt.Fprint(w, "/"+id)
+        messageId = id
     }
+    return messageId
 }
 
 func addToRecentMessages(text string, id MessageId) {

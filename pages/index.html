@@ -14,10 +14,14 @@
 <body>
 <a id="about" href="/about">#</a>
     <div id="wrapper">
-        <input id="msg-in" maxlength="100" type="textfield" value="Insert message here"></input>
+        <form action="/submit">
+        <input id="msg-in" name="msg" maxlength="100" type="textfield" value="Insert message here"></input>
+        <br />
         <b><span id="msg">
-            Insert message here.
+            <noscript>Javascript is disabled.</noscript>
         </span></b>
+        <noscript><p>Oh well... Just type the message above and press enter to submit</p></noscript>
+        </form>
     </div>
 </body>
 </html>
