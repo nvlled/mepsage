@@ -4,7 +4,7 @@ package main
 import (
     "net/http"
     "fmt"
-    "strings"
+    //"strings"
     "log"
     "strconv"
     "math"
@@ -44,7 +44,7 @@ func buildRoutes() http.Handler {
     router.HandleFunc("/", indexPage)
     router.HandleFunc("/wat", watPage)
     router.HandleFunc("/submit", submit)
-    router.HandleFunc(messagePath, getMessage)
+    router.HandleFunc("/{id}", messagePage)
 
     sub := router.PathPrefix("/"+ResourcesDir)
     sub.Handler(http.StripPrefix("/"+ResourcesDir, fileServer))
@@ -52,8 +52,8 @@ func buildRoutes() http.Handler {
     return router
 }
 
-func getMessage(w http.ResponseWriter, r *http.Request) {
-    id := strings.TrimPrefix(r.URL.Path,messagePath)
+func messagePage(w http.ResponseWriter, r *http.Request) {
+    id := mux.Vars(r)["id"]
     msg, ok := messages[id]
 
     if !ok {
@@ -81,12 +81,11 @@ func watPage(w http.ResponseWriter, r *http.Request) {
     http.ServeFile(w, r, "pages/wat.html")
 }
 
-
 func submit(w http.ResponseWriter, r *http.Request) {
     msg := r.FormValue("msg")
     id := generateId()
     messages[id] = msg
-    fmt.Fprint(w,messagePath+id)
+    fmt.Fprint(w, "/"+id)
 }
 
 func generateId() string {
