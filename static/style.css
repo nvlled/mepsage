@@ -16,19 +16,19 @@ body {
 
 #wrapper {
     padding-top: 50px;
-    width: 800px;
+    width: 98%;
     margin-right: auto;
     margin-left: auto;
     word-break: break-word;
 }
 
 
-#wat {
-    font-size: 50px;
+#about {
+    font-size: 25px;
     text-decoration: none;
     color: #000;
 }
 
-#wat:hover {
+#about:hover {
     color: #a00;
 }

@@ -49,7 +49,7 @@ func buildRoutes() http.Handler {
     router.StrictSlash(true)
 
     router.HandleFunc("/", indexPage)
-    router.HandleFunc("/wat", watPage)
+    router.HandleFunc("/about", aboutPage)
     router.HandleFunc("/submit", submit)
     router.HandleFunc("/{id}", messagePage)
 
@@ -73,6 +73,9 @@ func renderMessage(w http.ResponseWriter, msg string) {
     t, _ := template.ParseFiles("pages/message.html")
     t.Execute(w, map[string] string {
         "Message": msg,
+func aboutPage(w http.ResponseWriter, r *http.Request) {
+    render(w, "about", map[string]interface{}{
+        "Messages": recentMessages,
     })
 }
 
