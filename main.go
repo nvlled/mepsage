@@ -13,7 +13,11 @@ import (
     "github.com/gorilla/mux"
     //"os"
     "time"
+    "crypto/sha256"
 )
+
+type MessageId string
+type HashKey [sha256.Size]byte
 
 const (
     Port = "7000"
@@ -22,16 +26,19 @@ const (
 )
 
 var (
-    messages map[string]string
+    hashes map[HashKey]MessageId
+    messages map[MessageId]string
 )
 
 func init() {
     rand.Seed(time.Now().Unix())
-    messages = make(map[string]string)
+    hashes = make(map[HashKey]MessageId)
+    messages = make(map[MessageId]string)
 }
 
 func main() {
     handler := buildRoutes()
+
     log.Println("Server started at " + Port)
     log.Fatal(http.ListenAndServe(":"+Port, handler))
 }
@@ -54,7 +61,7 @@ func buildRoutes() http.Handler {
 
 func messagePage(w http.ResponseWriter, r *http.Request) {
     id := mux.Vars(r)["id"]
-    msg, ok := messages[id]
+    msg, ok := messages[MessageId(id)]
 
     if !ok {
         msg = "404 Page Not Found"
@@ -83,14 +90,21 @@ func watPage(w http.ResponseWriter, r *http.Request) {
 
 func submit(w http.ResponseWriter, r *http.Request) {
     msg := r.FormValue("msg")
-    id := generateId()
-    messages[id] = msg
-    fmt.Fprint(w, "/"+id)
+
+    key := HashKey(sha256.Sum256([]byte(msg)))
+    if id, ok := hashes[key]; ok {
+        log.Println("Re-using message with id", id)
+        fmt.Fprint(w, "/"+id)
+    } else {
+        id := generateId()
+        hashes[key] = id
+        messages[id] = msg
+        fmt.Fprint(w, "/"+id)
+    }
 }
 
-func generateId() string {
+func generateId() MessageId {
     var min int64 = int64(math.Pow(35, 5))
     var max int64 = int64(math.Pow(35, 6))
-    return strconv.FormatInt(min + rand.Int63n(max - min), 35)
+    return MessageId(strconv.FormatInt(min + rand.Int63n(max - min), 35))
 }
-
