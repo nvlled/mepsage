@@ -18,22 +18,41 @@ import (
 
 type MessageId string
 type HashKey [sha256.Size]byte
+type Message struct{
+    Text string
+    Id MessageId
+}
 
 const (
     Port = "7000"
     ResourcesDir = "static/"
     messagePath = "/m/"
+    MaxRecent = 10
 )
 
 var (
     hashes map[HashKey]MessageId
     messages map[MessageId]string
+    recentMessages []Message
+    templ map[string]*template.Template
 )
 
 func init() {
     rand.Seed(time.Now().Unix())
     hashes = make(map[HashKey]MessageId)
     messages = make(map[MessageId]string)
+    templ = make(map[string]*template.Template)
+    initTemplates()
+}
+
+func initTemplates() {
+    t, err := template.ParseFiles("pages/message.html")
+    if err != nil { panic(err) }
+    templ["message"] = t
+
+    t, err = template.ParseFiles("pages/about.html")
+    if err != nil { panic(err) }
+    templ["about"] = t
 }
 
 func main() {
@@ -66,13 +85,11 @@ func messagePage(w http.ResponseWriter, r *http.Request) {
     if !ok {
         msg = "404 Page Not Found"
     }
-    renderMessage(w, msg)
+    render(w, "message", map[string]interface{}{
+        "Message": msg,
+    })
 }
 
-func renderMessage(w http.ResponseWriter, msg string) {
-    t, _ := template.ParseFiles("pages/message.html")
-    t.Execute(w, map[string] string {
-        "Message": msg,
 func aboutPage(w http.ResponseWriter, r *http.Request) {
     render(w, "about", map[string]interface{}{
         "Messages": recentMessages,
@@ -80,15 +97,15 @@ func aboutPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func indexPage(w http.ResponseWriter, r *http.Request) {
-    if r.URL.Path != "/" {
-        renderMessage(w, "You must be lost.")
-    } else {
-        http.ServeFile(w, r, "pages/index.html")
-    }
+    http.ServeFile(w, r, "pages/index.html")
 }
 
-func watPage(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "pages/wat.html")
+func render(w http.ResponseWriter, name string, data map[string]interface{}) {
+    t, ok := templ[name]
+    if !ok {
+        panic("template not found")
+    }
+    t.Execute(w, data)
 }
 
 func submit(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +119,18 @@ func submit(w http.ResponseWriter, r *http.Request) {
         id := generateId()
         hashes[key] = id
         messages[id] = msg
+        addToRecentMessages(msg, id)
         fmt.Fprint(w, "/"+id)
+    }
+}
+
+func addToRecentMessages(text string, id MessageId) {
+    recentMessages = append(recentMessages, Message{
+        Text: text,
+        Id: id,
+    })
+    if len(recentMessages) > MaxRecent {
+        recentMessages = recentMessages[1:]
     }
 }
 
