@@ -11,7 +11,7 @@ import (
     "math/rand"
     "html/template"
     "github.com/gorilla/mux"
-    //"os"
+    "os"
     "time"
     "crypto/sha256"
 )
@@ -57,9 +57,13 @@ func initTemplates() {
 
 func main() {
     handler := buildRoutes()
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = Port
+    }
 
-    log.Println("Server started at " + Port)
-    log.Fatal(http.ListenAndServe(":"+Port, handler))
+    log.Println("Server started at " + port)
+    log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 func buildRoutes() http.Handler {
