@@ -10,6 +10,7 @@ import (
     "math"
     "math/rand"
     "html/template"
+    "github.com/gorilla/mux"
     //"os"
     "time"
 )
@@ -30,19 +31,25 @@ func init() {
 }
 
 func main() {
-    addRoutes()
+    handler := buildRoutes()
     log.Println("Server started at " + Port)
-    log.Fatal(http.ListenAndServe("mepsage:"+Port, nil))
+    log.Fatal(http.ListenAndServe(":"+Port, handler))
 }
 
-func addRoutes() {
+func buildRoutes() http.Handler {
     fileServer := http.FileServer(http.Dir(ResourcesDir))
-    http.Handle("/"+ResourcesDir, http.StripPrefix("/"+ResourcesDir, fileServer))
+    router := mux.NewRouter()
+    router.StrictSlash(true)
 
-    http.HandleFunc("/", indexPage)
-    http.HandleFunc("/wat", watPage)
-    http.HandleFunc("/submit", submit)
-    http.HandleFunc(messagePath, getMessage)
+    router.HandleFunc("/", indexPage)
+    router.HandleFunc("/wat", watPage)
+    router.HandleFunc("/submit", submit)
+    router.HandleFunc(messagePath, getMessage)
+
+    sub := router.PathPrefix("/"+ResourcesDir)
+    sub.Handler(http.StripPrefix("/"+ResourcesDir, fileServer))
+
+    return router
 }
 
 func getMessage(w http.ResponseWriter, r *http.Request) {
