@@ -1,9 +1,7 @@
 mepsage
 =======
 
-A whole page message container. Working site can be found [here](http://mepsage.nvlled.pw/ "Mepsage").
-
-[Screenshot](http://i.imgur.com/vET50sO.png)
+A whole page message container. Working site can be found [here](http://mepsage.herokuapp.com/ "Mepsage").
 
 TODO
 ====
