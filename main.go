@@ -3,37 +3,18 @@ package main
 
 import (
     "net/http"
-    "fmt"
     //"strings"
     "log"
     "html/template"
     "github.com/gorilla/mux"
     "os"
-    "github.com/nvlled/mepsage/db"
 )
 
 const (
     Port = "7000"
-    ResourcesDir = "static/"
-    messagePath = "/m/"
 )
 
 var templ map[string]*template.Template
-
-func init() {
-    templ = make(map[string]*template.Template)
-    initTemplates()
-}
-
-func initTemplates() {
-    t, err := template.ParseFiles("pages/message.html")
-    if err != nil { panic(err) }
-    templ["message"] = t
-
-    t, err = template.ParseFiles("pages/about.html")
-    if err != nil { panic(err) }
-    templ["about"] = t
-}
 
 func main() {
     handler := buildRoutes()
@@ -63,46 +44,17 @@ func buildRoutes() http.Handler {
     return router
 }
 
-func messagePage(w http.ResponseWriter, r *http.Request) {
-    id := mux.Vars(r)["id"]
-    msg, ok := db.GetMessage(db.MessageId(id))
-
-    if !ok {
-        msg = "404 Page Not Found"
-    }
-    render(w, "message", map[string]interface{}{
-        "Message": msg,
-    })
+func init() {
+    templ = make(map[string]*template.Template)
+    initTemplates()
 }
 
-func aboutPage(w http.ResponseWriter, r *http.Request) {
-    render(w, "about", map[string]interface{}{
-        "Messages": db.RecentMessages(),
-    })
-}
+func initTemplates() {
+    t, err := template.ParseFiles("pages/message.html")
+    if err != nil { panic(err) }
+    templ["message"] = t
 
-func indexPage(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "pages/index.html")
-}
-
-func render(w http.ResponseWriter, name string, data map[string]interface{}) {
-    t, ok := templ[name]
-    if !ok {
-        panic("template not found")
-    }
-    t.Execute(w, data)
-}
-
-func submitPage(w http.ResponseWriter, r *http.Request) {
-    msg := r.FormValue("msg")
-    id := db.AddMessage(msg)
-    w.Header().Set("Location", "/"+string(id))
-    w.WriteHeader(301)
-    fmt.Fprint(w, "/"+id)
-}
-
-func submitAsync(w http.ResponseWriter, r *http.Request) {
-    msg := r.FormValue("msg")
-    id := db.AddMessage(msg)
-    fmt.Fprint(w, "/"+id)
+    t, err = template.ParseFiles("pages/about.html")
+    if err != nil { panic(err) }
+    templ["about"] = t
 }
