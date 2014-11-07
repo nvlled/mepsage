@@ -12,7 +12,7 @@ import (
 )
 
 const (
-    MaxRecent = 10
+    MaxRecent = 8
 )
 
 type MessageId string
@@ -25,7 +25,7 @@ type Message struct{
 type API interface {
     AddMessage(message string) MessageId
     GetMessage(id MessageId) (string, bool)
-    RecentMessages() []Message
+    RecentMessages(limit ...int) []Message
 }
 
 func generateId() MessageId {
@@ -68,8 +68,16 @@ func (store *MemStore) GetMessage(id MessageId) (string, bool) {
     return msg, ok
 }
 
-func (store *MemStore) RecentMessages() []Message {
-    return store.recentMessages
+func (store *MemStore) RecentMessages(limitArg ...int) []Message {
+    limit := MaxRecent
+    if len(limitArg) > 0 {
+        limit = limitArg[0]
+    }
+    messages := store.recentMessages
+    n := len(messages)
+    messages = messages[max(0, n-limit):n]
+    // TODO: reverse order
+    return messages
 }
 
 func (store *MemStore) addToRecentMessages(text string, id MessageId) {
@@ -131,12 +139,17 @@ func (store *SqlStore) GetMessage(id MessageId) (string, bool) {
     return content, true
 }
 
-func (store *SqlStore) RecentMessages() (messages []Message) {
+func (store *SqlStore) RecentMessages(limitArg ...int) (messages []Message) {
+    limit := MaxRecent
+    if len(limitArg) > 0 {
+        limit = limitArg[0]
+    }
+
     rows, err := Db.Query(`
         SELECT content, id FROM messages
             ORDER BY time DESC
             LIMIT $1
-        `, MaxRecent)
+        `, limit)
 
     if err != nil { panic(err) }
     for rows.Next() {
@@ -146,6 +159,10 @@ func (store *SqlStore) RecentMessages() (messages []Message) {
     }
 
     return
+}
+
+func max(x int , y int) int {
+    return int(math.Max(float64(x), float64(y)))
 }
 
 func init() {

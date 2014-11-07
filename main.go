@@ -32,6 +32,7 @@ func buildRoutes() http.Handler {
     router := mux.NewRouter()
     router.StrictSlash(true)
 
+    router.HandleFunc("/", indexPage)
     router.HandleFunc("/create", createPage)
     router.HandleFunc("/about", aboutPage)
     router.HandleFunc("/submit", submitPage)

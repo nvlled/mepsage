@@ -6,11 +6,29 @@ import (
     "github.com/gorilla/mux"
     "github.com/nvlled/mepsage/db"
     "fmt"
+    "math/rand"
 )
 
 const (
     ResourcesDir = "static/"
 )
+
+func indexPage(w http.ResponseWriter, r *http.Request) {
+    messages := db.RecentMessages(4)
+    n := len(messages)
+
+    var location string
+    if n > 0 {
+        i := rand.Intn(n-1)
+        msg := messages[i]
+        location = "/"+string(msg.Id)
+    } else {
+        location = "/create"
+    }
+
+    w.Header().Set("Location", location)
+    w.WriteHeader(302)
+}
 
 func messagePage(w http.ResponseWriter, r *http.Request) {
     id := mux.Vars(r)["id"]

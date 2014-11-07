@@ -28,8 +28,8 @@ func GetMessage(id MessageId) (string, bool) {
     return Store.GetMessage(id)
 }
 
-func RecentMessages() []Message {
-    return Store.RecentMessages()
+func RecentMessages(limitArg ...int) []Message {
+    return Store.RecentMessages(limitArg...)
 }
 
 func initSqlStore() (API, error) {
