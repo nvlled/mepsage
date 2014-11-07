@@ -30,8 +30,8 @@ func aboutPage(w http.ResponseWriter, r *http.Request) {
     })
 }
 
-func indexPage(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "pages/index.html")
+func createPage(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "pages/create.html")
 }
 
 func render(w http.ResponseWriter, name string, data map[string]interface{}) {
