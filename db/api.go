@@ -190,7 +190,7 @@ func (store *SqlStore) RecentMessages(limitArg ...int) (messages []Message) {
 func (store *SqlStore) RandomMessage() Message {
 	rows, err := Db.Query(`
         SELECT content, id FROM messages
-            ORDER BY RAND()
+			OFFSET floor(random()*(select count(*) from messages))
             LIMIT 1
 	`)
 
