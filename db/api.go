@@ -183,6 +183,7 @@ func (store *SqlStore) RecentMessages(limitArg ...int) (messages []Message) {
 		rows.Scan(&content, &id)
 		messages = append(messages, Message{content, MessageId(id)})
 	}
+	rows.Close()
 
 	return
 }
@@ -197,12 +198,14 @@ func (store *SqlStore) RandomMessage() Message {
 	if err != nil {
 		panic(err)
 	}
+	msg := Message{}
 	if rows.Next() {
 		var content, id string
 		rows.Scan(&content, &id)
-		return Message{content, MessageId(id)}
+		msg = Message{content, MessageId(id)}
 	}
-	return Message{}
+	rows.Close()
+	return msg
 }
 
 func max(x int, y int) int {
